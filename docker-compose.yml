@@ -1,0 +1,43 @@
+version: "3"
+services:
+  strapi:
+    container_name: ${APP_NAME}-strapi
+    build:
+      context: ./setup/strapi
+      dockerfile: ./Dockerfile
+    environment:
+      DATABASE_CLIENT: mysql
+      DATABASE_HOST: mariadb-strapi
+      DATABASE_PORT: 3306
+      DATABASE_NAME: example
+      DATABASE_USERNAME: example
+      DATABASE_PASSWORD: example
+      DATABASE_SSL: "false"
+      STRAPI_VERSION: "4.0.5"
+      BASE_VERSION: 14
+      PUBLIC_URL: "http://${APP_NAME}-strapi.${BASE_DOMAIN}"
+      NODE_VERSION: "14.17.0" #this is the version that replaces the base image
+    volumes:
+      - ./apps/strapi:/srv/app
+    ports:
+      - "1337:1337"
+    depends_on:
+      - mariadb-strapi
+    networks:
+      - internal
+      - web
+
+  mariadb-strapi:
+    image: mariadb
+    container_name: ${APP_NAME}-mariadb-strapi
+    command: --max-allowed-packet=128MB --lower_case_table_names=2 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
+    volumes:
+      - ./storage/mariadb-strapi:/var/lib/mysql:delegated
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+      MARIADB_DATABASE: example
+      MARIADB_USER: example
+      MARIADB_PASSWORD: example
+    networks:
+      - internal
